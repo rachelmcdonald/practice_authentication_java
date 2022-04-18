@@ -22,6 +22,7 @@ function App() {
 
   const [accessToken, setAccessToken] = useState(null);
   const [fetchedTasks, setFetchedTasks] = useState([]);
+  const [isLoaded, setIsLoaded] = useState(false); 
 
   useEffect(() => {
       const getAccessToken = async () => {
@@ -31,13 +32,38 @@ function App() {
             scope: configData.scope,
           });
           setAccessToken(accessToken);
+          setIsLoaded(true);
         } catch (e) {
           console.log(e.message);
         }
       };
       getAccessToken();
-      getTasks();
     }, [getAccessTokenSilently]);
+
+    useEffect(() => {
+      if (!isLoaded) {
+        return;
+      }
+
+      const getTasks =  async () => {
+
+        fetch("http://localhost:8080/auth0/tasks", {
+        method: "GET",
+        headers: new Headers({
+          Authorization: "Bearer " + accessToken,
+          "Content-Type": "application/json",
+        }),
+      })
+        .then(function (res) {
+          return res.json();
+        })
+        .then(function (resJson) {
+          setFetchedTasks(resJson);
+        })
+        .catch((e) => console.log(e));
+    }
+      getTasks();
+    }, [isLoaded]);
 
     const securedAPITest = () => {
       fetch("http://localhost:8080/auth0/private", {
@@ -56,23 +82,7 @@ function App() {
         .catch((e) => console.log(e));
     };
 
-    const getTasks = () => {
-
-      fetch("http://localhost:8080/auth0/tasks", {
-      method: "GET",
-      headers: new Headers({
-        Authorization: "Bearer " + accessToken,
-        "Content-Type": "application/json",
-      }),
-    })
-      .then(function (res) {
-        return res.json();
-      })
-      .then(function (resJson) {
-        console.log(resJson)
-      })
-      .catch((e) => console.log(e));
-  };
+    
 
   if (error) {
     return <div>Oops... {error.message}</div>;
