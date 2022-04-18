@@ -1,0 +1,6 @@
+{
+    "domain": "dev-m58jej84.us.auth0.com",
+    "clientId": "uckuHYKLhKCQMcKinDaw6hs039zT5ybb",
+    "audience": "https://dev-m58jej84.us.auth0.com/api/v2/",
+    "scope": "read:users"
+}

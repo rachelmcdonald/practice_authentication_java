@@ -1,22 +1,81 @@
 import logo from './logo.svg';
 import './App.css';
+import { useAuth0 } from '@auth0/auth0-react';
+
+import { useState, useEffect} from 'react';
+import configData from "./config.json";
+
 
 function App() {
+
+  const {
+    isLoading,
+    error,
+    isAuthenticated,
+    user,
+    getAccessTokenSilently,
+    loginWithRedirect,
+    logout,
+  } = useAuth0();
+  
+
+  const [accessToken, setAccessToken] = useState(null);
+
+  useEffect(() => {
+      const getAccessToken = async () => {
+        try {
+          const accessToken = await getAccessTokenSilently({
+            audience: configData.audience,
+            scope: configData.scope,
+          });
+          setAccessToken(accessToken);
+        } catch (e) {
+          console.log(e.message);
+        }
+      };
+      getAccessToken();
+    }, [getAccessTokenSilently]);
+
+    const securedAPITest = () => {
+      fetch("http://localhost:8080/auth0/private", {
+        method: "GET",
+        headers: new Headers({
+          Authorization: "Bearer " + accessToken,
+          "Content-Type": "application/json",
+        }),
+      })
+        .then(function (res) {
+          return res.json();
+        })
+        .then(function (resJson) {
+          console.log(resJson)
+        })
+        .catch((e) => console.log(e));
+    };
+
+  if (error) {
+    return <div>Oops... {error.message}</div>;
+  }
+  
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+  
+  if (!isAuthenticated) {
+    return loginWithRedirect();
+  }
+
   return (
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+        <p>Hi {user.email}, You have successfully logged in.</p>
+
+        <button onClick={() => securedAPITest()}>Test Private API</button>
+
+        <button onClick={() => logout({ returnTo: window.location.origin })}>
+          Log Out
+        </button>
       </header>
     </div>
   );
