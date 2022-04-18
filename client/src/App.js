@@ -4,6 +4,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 
 import { useState, useEffect} from 'react';
 import configData from "./config.json";
+import TaskContainer from './TaskContainer';
 
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
   
 
   const [accessToken, setAccessToken] = useState(null);
+  const [fetchedTasks, setFetchedTasks] = useState([]);
 
   useEffect(() => {
       const getAccessToken = async () => {
@@ -34,6 +36,7 @@ function App() {
         }
       };
       getAccessToken();
+      getTasks();
     }, [getAccessTokenSilently]);
 
     const securedAPITest = () => {
@@ -52,6 +55,24 @@ function App() {
         })
         .catch((e) => console.log(e));
     };
+
+    const getTasks = () => {
+
+      fetch("http://localhost:8080/auth0/tasks", {
+      method: "GET",
+      headers: new Headers({
+        Authorization: "Bearer " + accessToken,
+        "Content-Type": "application/json",
+      }),
+    })
+      .then(function (res) {
+        return res.json();
+      })
+      .then(function (resJson) {
+        console.log(resJson)
+      })
+      .catch((e) => console.log(e));
+  };
 
   if (error) {
     return <div>Oops... {error.message}</div>;
@@ -76,6 +97,8 @@ function App() {
         <button onClick={() => logout({ returnTo: window.location.origin })}>
           Log Out
         </button>
+
+        <TaskContainer />
       </header>
     </div>
   );
