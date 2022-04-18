@@ -31,7 +31,7 @@ public class Auth0TestController {
     }
 
     @GetMapping(value = "/tasks")
-    public ResponseEntity<ResponseDTO> getAllTasks() {
-        return ResponseEntity.ok(new ResponseDTO(taskRepository.findAll().toString()));
+    public ResponseEntity<List<Task>> getAllTasks() {
+        return new ResponseEntity<>(taskRepository.findAll(), HttpStatus.OK);
     }
 }
