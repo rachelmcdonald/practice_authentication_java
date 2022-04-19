@@ -1,16 +1,17 @@
 package com.practice.example.practice;
 
 import com.practice.example.practice.models.Task;
+import com.practice.example.practice.models.User;
 import com.practice.example.practice.repositories.TaskRepository;
+import com.practice.example.practice.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @CrossOrigin("*")
@@ -19,6 +20,9 @@ public class Auth0TestController {
 
     @Autowired
     TaskRepository taskRepository;
+
+    @Autowired
+    UserRepository userRepository;
 
     @GetMapping(value = "/public")
     public ResponseEntity<ResponseDTO> publicEndpoint() {
@@ -31,7 +35,21 @@ public class Auth0TestController {
     }
 
     @GetMapping(value = "/tasks")
-    public ResponseEntity<List<Task>> getAllTasks() {
-        return new ResponseEntity<>(taskRepository.findAll(), HttpStatus.OK);
+    public ResponseEntity<List<Task>> getAllUserTasks() {
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        return new ResponseEntity<>(taskRepository.findByUserAuthId(userId), HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/users")
+    public ResponseEntity postUser(){
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+//      try to find user
+        Optional foundUser = userRepository.findByAuthId(userId);
+        //  if there is no user that matches then save the user, otherwise do nothing
+        if ( !foundUser.isPresent() ){
+            User newUser = new User(userId);
+            userRepository.save(newUser);
+        }
+        return new ResponseEntity<>(userId, HttpStatus.CREATED);
     }
 }
