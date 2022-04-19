@@ -1,29 +1,33 @@
 package com.practice.example.practice.models;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import net.bytebuddy.dynamic.loading.InjectionClassLoader;
+
+import javax.persistence.*;
 
 @Entity
 @Table(name="user")
 public class User {
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    public User(String id) {
-        this.id = id;
+    @Column(name="auth_id")
+    private String authId;
+
+    public User(String authId) {
+        this.authId = authId;
     }
 
     public User(){
 
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 }

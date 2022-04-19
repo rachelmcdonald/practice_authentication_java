@@ -38,6 +38,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .mvcMatchers("/auth0/public").permitAll()
                 .mvcMatchers("/auth0/private").authenticated()
                 .mvcMatchers("/auth0/tasks").permitAll()
+                .mvcMatchers("/auth0/users").authenticated()
+                .mvcMatchers("/h2").permitAll()
                 .and()
                 .oauth2ResourceServer().jwt();
     }

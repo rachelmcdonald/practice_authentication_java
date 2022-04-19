@@ -45,25 +45,38 @@ function App() {
         return;
       }
 
-      const getTasks =  async () => {
+      const getTasks =  async (authId) => {
+          fetch("http://localhost:8080/auth0/tasks", 
+          {
+            method: "GET",
+            headers: new Headers({
+            Authorization: "Bearer " + accessToken,
+            "Content-Type": "application/json",
+            }),
+          })
+          .then(function (res) {
+            return res.json();
+          })
+          .then(function (resJson) {
+            setFetchedTasks(resJson);
+          })
+          .catch((e) => console.log(e));
+    }
+        getTasks();
+        postUser();
+    }, [isLoaded]);
 
-        fetch("http://localhost:8080/auth0/tasks", {
-        method: "GET",
-        headers: new Headers({
-          Authorization: "Bearer " + accessToken,
-          "Content-Type": "application/json",
-        }),
-      })
-        .then(function (res) {
-          return res.json();
+    const postUser = (payload) => {
+        fetch('http://localhost:8080/auth0/users', {
+          method: "POST",
+          headers: new Headers({
+            Authorization: "Bearer " + accessToken,
+            "Content-Type": "application/json",
+          })
         })
-        .then(function (resJson) {
-          setFetchedTasks(resJson);
-        })
+        .then(res => res.json())
         .catch((e) => console.log(e));
     }
-      getTasks();
-    }, [isLoaded]);
 
     const securedAPITest = () => {
       fetch("http://localhost:8080/auth0/private", {
@@ -100,7 +113,7 @@ function App() {
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
-        <p>Hi {user.email}, You have successfully logged in.</p>
+        <p>Hi {user.name}, You have successfully logged in.</p>
 
         <button onClick={() => securedAPITest()}>Test Private API</button>
 
